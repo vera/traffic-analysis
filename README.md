@@ -26,7 +26,9 @@ In the case of an unexpected type of packet, the script may additionally print a
 
 ```
 usage: traffic_analyser.py [-h] --pcap PCAP --server-addr SERVER_ADDR --device-addr DEVICE_ADDR
-                           [--tshark TSHARK] [--mqtt-version MQTT_VERSION] [--check-total]
+                           [--src-addr-field SRC_ADDR_FIELD] [--dst-addr-field DST_ADDR_FIELD]
+                           [--tshark TSHARK] [--mqtt-version MQTT_VERSION]
+                           [--mqttsn-port MQTTSN_PORT] [--check-totals]
                            [--payload-analyser PAYLOAD_ANALYSER]
 
 optional arguments:
@@ -36,11 +38,19 @@ optional arguments:
                         IP address of the server
   --device-addr DEVICE_ADDR
                         IP address of the device
+  --src-addr-field SRC_ADDR_FIELD
+                        source address field (Wireshark notation)
+  --dst-addr-field DST_ADDR_FIELD
+                        destination address field (Wireshark notation)
   --tshark TSHARK       path to tshark binary
   --mqtt-version MQTT_VERSION
                         MQTT version to assume when parsing packets (possible options: 3.1,
                         3.1.1, 5.0)
-  --check-total         check if protocol bytes add up to total frame bytes
+  --mqttsn-port MQTTSN_PORT
+                        UDP port to parse as MQTT-SN
+  --check-totals        check if bytes correctly add up to the totals
   --payload-analyser PAYLOAD_ANALYSER
                         name of module for payload analysis
 ```
+
+For "Wireshark notation", see: https://www.wireshark.org/docs/dfref/

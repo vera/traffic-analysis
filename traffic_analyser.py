@@ -31,6 +31,7 @@ class TrafficAnalyser:
   def __init__(self, args):
     self.args = args
     self.override_prefs = { 'mqtt.default_version': 'MQTT v' + args.mqtt_version } if args.mqtt_version else {}
+    self.decode_as = {'udp.port==' + args.mqttsn_port: 'mqttsn'} if args.mqttsn_port else {}
     self.analysers = {}
 
     if self.args.payload_analyser:
@@ -38,13 +39,14 @@ class TrafficAnalyser:
 
   def load_capture(self, pcap, device_to_server):
     if device_to_server:
-      display_filter = "wpan.src64 == {} and wpan.dst64 == {} and not icmpv6".format(self.args.device_addr, self.args.server_addr)
+      display_filter = "{} == {} and {} == {} and not icmpv6".format(self.args.src_addr_field, self.args.device_addr, self.args.dst_addr_field, self.args.server_addr)
     else:
-      display_filter = "wpan.dst64 == {} and wpan.src64 == {} and not icmpv6".format(self.args.device_addr, self.args.server_addr)
+      display_filter = "{} == {} and {} == {} and not icmpv6".format(self.args.dst_addr_field, self.args.device_addr, self.args.src_addr_field, self.args.server_addr)
 
     self.cap = pyshark.FileCapture(pcap, tshark_path=self.args.tshark,
                                    display_filter=display_filter,
-                                   override_prefs=self.override_prefs)
+                                   override_prefs=self.override_prefs,
+                                   decode_as=self.decode_as)
 
   def close_capture(self):
     self.cap.close()
@@ -162,11 +164,14 @@ class TrafficAnalyser:
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument('--pcap', help="path to pcap file" , type=str, required=True, default="trace.pcap")
+  parser.add_argument('--pcap', help="path to pcap file" , type=str, required=True)
   parser.add_argument('--server-addr', help="IP address of the server" , type=str, required=True)
   parser.add_argument('--device-addr', help="IP address of the device" , type=str, required=True)
+  parser.add_argument('--src-addr-field', help="source address field (Wireshark notation)" , type=str, required=False, default="wpan.src64")
+  parser.add_argument('--dst-addr-field', help="destination address field (Wireshark notation)" , type=str, required=False, default="wpan.dst64")
   parser.add_argument('--tshark', help="path to tshark binary" , type=str, required=False)
   parser.add_argument('--mqtt-version', help="MQTT version to assume when parsing packets (possible options: 3.1, 3.1.1, 5.0)", type=str, required=False)
+  parser.add_argument('--mqttsn-port', help="UDP port to parse as MQTT-SN", type=str, required=False)
   parser.add_argument('--check-totals', help="check if bytes correctly add up to the totals",  dest='check_totals', action='store_true')
   parser.add_argument('--payload-analyser', help="name of module for payload analysis", type=str, required=False)
   parser.set_defaults(check_totals=False)
