@@ -14,3 +14,4 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from analysers.app_layer.mqtt import MqttAnalyser
+from analysers.app_layer.mqttsn import MqttsnAnalyser

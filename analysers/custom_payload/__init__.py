@@ -14,5 +14,3 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from analysers.custom_payload.myno import MynoAnalyser
-from analysers.custom_payload.suit import SuitAnalyser
-from analysers.custom_payload.default_mqtt import DefaultMqttPayloadAnalyser

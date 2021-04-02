@@ -14,3 +14,4 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from analysers.link_layer.wpan import WpanAnalyser
+from analysers.link_layer.eth import EthAnalyser

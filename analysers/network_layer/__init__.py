@@ -13,11 +13,4 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-class SuitAnalyser:
-  def __init__(self):
-    self.bytes = 0
-    self.packets = 0
-
-  def reset(self):
-    self.bytes = 0
-    self.packets = 0
+from analysers.network_layer.ipv6 import Ipv6Analyser
