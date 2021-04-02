@@ -24,9 +24,6 @@ from pyshark.tshark.tshark import get_tshark_version
 
 import analysers
 
-WPAN_ACKS_FILTER = "wpan.frame_type == 2"
-ICMPV6_FILTER = "icmpv6"
-
 class TrafficAnalyser:
   def __init__(self, args):
     self.args = args
@@ -74,9 +71,13 @@ class TrafficAnalyser:
       layers = packet.layers
 
       skip_layers = ['data']
+      # avoid counting bytes twice
       if ('ipv6' in map((lambda x: x.layer_name), packet.layers) and
           '6lowpan' in map((lambda x: x.layer_name), packet.layers)):
-        skip_layers.append('ipv6') # to avoid counting bytes twice
+        skip_layers.append('ipv6')
+      if ('coap' in map((lambda x: x.layer_name), packet.layers) and
+          'data-text-lines' in map((lambda x: x.layer_name), packet.layers)):
+        skip_layers.append('data-text-lines')
 
       for layer in layers:
         if layer.layer_name in skip_layers:
@@ -135,7 +136,7 @@ class TrafficAnalyser:
         print("  " * level + printable_key + ":\t" + ('' if len(key) > 12 else '\t' if len(key) > 6-2*level else '\t\t'), bytes[key]/1000, "kB")
 
   def print_analysis(self):
-    print("Packets:\t\t", self.packets)
+    print("Packets:\t\t{}\n".format(self.packets))
     self._print_bytes(self.bytes)
 
   def _add_bytes(self, bytes):

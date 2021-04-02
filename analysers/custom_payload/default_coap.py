@@ -13,6 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from analysers.app_layer.mqtt import MqttAnalyser
-from analysers.app_layer.mqttsn import MqttsnAnalyser
-from analysers.app_layer.coap import CoapAnalyser
+class DefaultCoapPayloadAnalyser:
+  def __init__(self):
+    self.bytes = { 'uris': 0, 'payloads': 0, 'total': 0 }
+    self.packets = 0
+
+  def reset(self):
+    self.bytes = { 'uris': 0, 'payloads': 0, 'total': 0 }
+    self.packets = 0
+
+  def add(self, coap, uri_bytes, payload_bytes):
+    self.packets += 1
+
+    self.bytes['uris'] += uri_bytes
+    self.bytes['payloads'] += payload_bytes
+    self.bytes['total'] += uri_bytes + payload_bytes
