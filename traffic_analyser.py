@@ -49,9 +49,15 @@ class TrafficAnalyser:
   def close_capture(self):
     self.cap.close()
 
+  def _reset(self, analysers):
+    for analyser in analysers:
+      if isinstance(analyser, dict):
+        self._reset(analyser.values())
+      else:
+        analyser.reset()
+
   def reset(self):
-    for analyser in self.analysers.values():
-      analyser.reset()
+    self._reset(self.analysers.values())
 
   def analyse_capture(self):
     self.bytes = { 'total': 0 }
@@ -85,7 +91,11 @@ class TrafficAnalyser:
 
             # TODO there must be a better way to do this
             if 'app_layer' in analyser_class.__module__:
-              self.analysers[layer_name] = analyser_class(self.analysers['payload'])
+              if 'payload' in self.analysers:
+                self.analysers[layer_name] = analyser_class(self.analysers['payload'])
+              else:
+                self.analysers[layer_name] = analyser_class(None)
+                self.analysers['payload_' + layer_name] = self.analysers[layer_name].payload_analyser
             else:
               self.analysers[layer_name] = analyser_class()
           except AttributeError:
@@ -95,11 +105,21 @@ class TrafficAnalyser:
         
         self.analysers[layer_name].add(layer)
 
-    for layer_name in self.analysers:
-      self.bytes[layer_name] = self.analysers[layer_name].bytes
+    self.bytes.update(self._collect_bytes(self.analysers))
 
     if len(unhandled_layers) > 0:
       print('WARNING: Unhandled layers: {}\n'.format(', '.join(unhandled_layers)))
+
+  def _collect_bytes(self, analysers):
+    bytes = {}
+
+    for layer_name in analysers:
+      if isinstance(analysers[layer_name], dict):
+        bytes[layer_name] = self._collect_bytes(analysers[layer_name])
+      else:
+        bytes[layer_name] = analysers[layer_name].bytes
+
+    return bytes
 
   def _print_bytes(self, bytes, level=0):
     for key in sorted(bytes.keys(), key=(lambda x: x == 'total')):
@@ -129,7 +149,8 @@ class TrafficAnalyser:
         total += bytes[key]['total']
         totals += self._add_bytes(bytes[key])
 
-    totals.append((total, bytes['total']))
+    if 'total' in bytes:
+      totals.append((total, bytes['total']))
     return totals
 
   def check_totals(self):

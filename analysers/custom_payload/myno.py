@@ -22,6 +22,7 @@ class MynoAnalyser:
                    'rpc_counters': 0,
                    'slice_numbers': 0,
                    'netconf_params': 0,
+                   'mqtt_topics': 0,
                    'total': 0 }
     self.packets = 0
 
@@ -31,12 +32,14 @@ class MynoAnalyser:
                    'rpc_counters': 0,
                    'slice_numbers': 0,
                    'netconf_params': 0,
+                   'mqtt_topics': 0,
                    'total': 0 }
     self.packets = 0
 
   def add(self, mqtt, topic_bytes):
     self.packets += 1
     self.bytes['total'] += int(mqtt.len) - topic_bytes
+    self.bytes['mqtt_topics'] += topic_bytes
 
     # Example messages:
     # 1. ASCII format:

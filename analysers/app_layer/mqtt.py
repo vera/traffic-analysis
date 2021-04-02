@@ -13,14 +13,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from analysers.custom_payload.default_mqtt import DefaultMqttPayloadAnalyser
+
 class MqttAnalyser:
   def __init__(self, payload_analyser):
-    self.bytes = { 'header': 0, 'topics': 0, 'total': 0 }
+    self.bytes = 0
     self.packets = 0
-    self.payload_analyser = payload_analyser
+    if payload_analyser:
+      self.payload_analyser = payload_analyser
+    else:
+      self.payload_analyser = DefaultMqttPayloadAnalyser()
 
   def reset(self):
-    self.bytes = { 'header': 0, 'topics': 0, 'total': 0 }
+    self.bytes = 0
     self.packets = 0
 
   def add(self, mqtt):
@@ -43,11 +48,8 @@ class MqttAnalyser:
         if mqtt.get_field('topic_len') is not None and int(mqtt.get_field('topic_len')) > 0:
           topic_bytes += len(mqtt.topic_len.binary_value) + len(mqtt.topic.binary_value)
 
-        if self.payload_analyser:
-          self.payload_analyser.add(mqtt, topic_bytes)
+        self.payload_analyser.add(mqtt, topic_bytes)
       else:
         print("WARNING: Unhandled MQTT message type", mqtt.msgtype)
 
-      self.bytes['header'] += header_bytes
-      self.bytes['topics'] += topic_bytes
-      self.bytes['total'] += header_bytes + topic_bytes
+      self.bytes += header_bytes

@@ -13,6 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from analysers.custom_payload.myno import MynoAnalyser
-from analysers.custom_payload.suit import SuitAnalyser
-from analysers.custom_payload.default_mqtt import DefaultMqttPayloadAnalyser
+class DefaultMqttPayloadAnalyser:
+  def __init__(self):
+    self.bytes = { 'topics': 0, 'messages': 0, 'total': 0 }
+    self.packets = 0
+
+  def reset(self):
+    self.bytes = { 'topics': 0, 'messages': 0, 'total': 0 }
+    self.packets = 0
+
+  def add(self, mqtt, topic_bytes):
+    self.packets += 1
+    self.bytes['total'] += int(mqtt.len)
+    self.bytes['messages'] += int(mqtt.len) - topic_bytes
+    self.bytes['topics'] += topic_bytes
