@@ -32,14 +32,15 @@ class CoapAnalyser:
     self.packets += 1
     self.bytes += 4 + int(coap.token_len) # Version, Type, TKL, Code, MID, Token
 
-    i = 0
-    for opt in coap.opt_name.all_fields:
-      self.bytes += 1 # Option Delta, Option Length
-      if 'Uri-Path' in str(opt):
-        self.payload_analyser.add(coap, int(coap.opt_length.all_fields[i].show), 0)
-      else:
-        self.bytes += coap.opt_length.all_fields[i].int_value
-      i += 1
+    if 'opt_name' in coap.field_names:
+      i = 0
+      for opt in coap.opt_name.all_fields:
+        self.bytes += 1 # Option Delta, Option Length
+        if 'Uri-Path' in str(opt):
+          self.payload_analyser.add(coap, int(coap.opt_length.all_fields[i].show), 0)
+        else:
+          self.bytes += coap.opt_length.all_fields[i].int_value
+        i += 1
 
     if 'opt_delta_ext' in coap.field_names:
       for ode in coap.opt_delta_ext.all_fields:
